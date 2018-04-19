@@ -10,6 +10,8 @@ __powerline() {
     COLOR_GIT=${COLOR_GIT:-'\[\033[0;36m\]'} # cyan
     COLOR_SUCCESS=${COLOR_SUCCESS:-'\[\033[0;32m\]'} # green
     COLOR_FAILURE=${COLOR_FAILURE:-'\[\033[0;31m\]'} # red
+    COLOR_VENV={$COLOR_VENV:-'\[\033[0;37m\]'} # white
+    COLOR_CHROOT={$COLOR_CHROOT:-'\[\033[0;37m\]'} # white
 
     # Symbols
     SYMBOL_GIT_BRANCH=${SYMBOL_GIT_BRANCH:-⑂}
@@ -60,6 +62,24 @@ __powerline() {
         printf " $ref$marks"
     }
 
+    __py_venv() {
+        local real_prefix_exists=$(python -c 'import sys; print hasattr(sys, "real_prefix")')
+        local vprefix
+        if [ "$real_prefix_exists" == "True" ]; then
+            vprefix=$(python -c 'import sys; print sys.prefix')
+            env_prompt=$(basename $vprefix)
+            printf "($env_prompt) "
+        fi
+    }
+
+    __chroot() {
+        # set variable identifying the chroot you work in (used in the prompt below)
+        if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+            debian_chroot=$(cat /etc/debian_chroot)
+            printf "($debian_chroot) "
+        fi
+    }
+
     ps1() {
         # Check the exit code of the previous command and display different
         # colors in the prompt accordingly. 
@@ -83,7 +103,10 @@ __powerline() {
             local git="$COLOR_GIT$(__git_info)$COLOR_RESET"
         fi
 
-        PS1="$cwd$git$symbol"
+        local venv="$COLOR_VENV$(__py_venv)$RESET"
+        local chroot="$COLOR_VENV$(__chroot)$RESET"
+
+        PS1="$chroot$venv$cwd$git$symbol"
     }
 
     PROMPT_COMMAND="ps1${PROMPT_COMMAND:+; $PROMPT_COMMAND}"
