@@ -63,7 +63,7 @@ __powerline() {
     }
 
     __py_venv() {
-        local real_prefix_exists=$(python -c 'import sys; print hasattr(sys, "real_prefix")')
+        local real_prefix_exists=$(python -c 'from __future__ import print_function; import sys; print(hasattr(sys, "real_prefix"))')
         local vprefix
         if [ "$real_prefix_exists" == "True" ]; then
             vprefix=$(python -c 'import sys; print sys.prefix')
