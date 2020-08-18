@@ -66,7 +66,7 @@ __powerline() {
         local real_prefix_exists=$(python -c 'from __future__ import print_function; import sys; print(hasattr(sys, "real_prefix"))')
         local vprefix
         if [ "$real_prefix_exists" == "True" ]; then
-            vprefix=$(python -c 'import sys; print sys.prefix')
+            vprefix=$(python -c 'from __future__ import print_function; import sys; print(sys.prefix)')
             env_prompt=$(basename $vprefix)
             printf "($env_prompt) "
         fi
