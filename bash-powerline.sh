@@ -10,8 +10,8 @@ __powerline() {
     COLOR_GIT=${COLOR_GIT:-'\[\033[0;36m\]'} # cyan
     COLOR_SUCCESS=${COLOR_SUCCESS:-'\[\033[0;32m\]'} # green
     COLOR_FAILURE=${COLOR_FAILURE:-'\[\033[0;31m\]'} # red
-    COLOR_VENV={$COLOR_VENV:-'\[\033[0;37m\]'} # white
-    COLOR_CHROOT={$COLOR_CHROOT:-'\[\033[0;37m\]'} # white
+    COLOR_VENV=${COLOR_VENV:-'\[\033[0;37m\]'} # white
+    COLOR_CHROOT=${COLOR_CHROOT:-'\[\033[0;37m\]'} # white
 
     # Symbols
     SYMBOL_GIT_BRANCH=${SYMBOL_GIT_BRANCH:-⑂}
@@ -63,11 +63,20 @@ __powerline() {
     }
 
     __py_venv() {
-        local real_prefix_exists=$(python -c 'from __future__ import print_function; import sys; print(hasattr(sys, "real_prefix"))')
-        local vprefix
-        if [ "$real_prefix_exists" == "True" ]; then
-            vprefix=$(python -c 'from __future__ import print_function; import sys; print(sys.prefix)')
-            env_prompt=$(basename $vprefix)
+        local venv_script
+        read -r -d '' venv_script << EOM
+from __future__ import print_function;
+import sys;
+
+venv = None
+if hasattr(sys, "real_prefix") or (hasattr(sys, "base_prefix") and sys.prefix != sys.base_prefix):
+    venv = sys.prefix
+
+print(venv)
+EOM
+        local venv_path=$(python -c "$venv_script")
+        if [ "$venv_path" != "None" ]; then
+            env_prompt=$(basename ${venv_path})
             printf "($env_prompt) "
         fi
     }
